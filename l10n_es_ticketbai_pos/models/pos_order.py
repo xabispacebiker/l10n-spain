@@ -94,9 +94,9 @@ class PosOrder(models.Model):
         if pos_order is None:
             vals["previous_tbai_invoice_id"] = self.config_id.tbai_last_invoice_id.id
         else:
-            previous_order_pos_reference = pos_order.get(
-                "tbai_previous_order_pos_reference", False
-            )
+            order_data = pos_order.get("data", {})
+            previous_order_pos_reference = \
+                order_data.get('tbai_previous_order_pos_reference', False)
             if previous_order_pos_reference:
                 tbai_previous_order = self.search(
                     [("l10n_es_unique_id", "=", previous_order_pos_reference)]
