@@ -10,6 +10,7 @@ setuptools.setup(
     install_requires=[
         'odoo14-addon-delivery_dhl_parcel',
         'odoo14-addon-delivery_gls_asm',
+        'odoo14-addon-delivery_mrw',
         'odoo14-addon-delivery_seur',
         'odoo14-addon-l10n_es_account_asset',
         'odoo14-addon-l10n_es_account_banking_sepa_fsdd',
@@ -19,6 +20,8 @@ setuptools.setup(
         'odoo14-addon-l10n_es_aeat_mod115',
         'odoo14-addon-l10n_es_aeat_mod123',
         'odoo14-addon-l10n_es_aeat_mod130',
+        'odoo14-addon-l10n_es_aeat_mod190',
+        'odoo14-addon-l10n_es_aeat_mod216',
         'odoo14-addon-l10n_es_aeat_mod303',
         'odoo14-addon-l10n_es_aeat_mod303_oss',
         'odoo14-addon-l10n_es_aeat_mod347',
@@ -53,6 +56,7 @@ setuptools.setup(
         'odoo14-addon-l10n_es_toponyms',
         'odoo14-addon-l10n_es_vat_book',
         'odoo14-addon-l10n_es_vat_book_oss',
+        'odoo14-addon-l10n_es_vat_prorate',
         'odoo14-addon-payment_redsys',
     ],
     classifiers=[
