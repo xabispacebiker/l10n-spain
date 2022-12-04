@@ -11,6 +11,7 @@ odoo.define("l10n_esthis.env._ticketbai_pos.PaymentScreen", function (require) {
     var _t = core._t;
     const PaymentScreen = require("point_of_sale.PaymentScreen");
     const Registries = require("point_of_sale.Registries");
+    var framework = require('web.framework');
 
     const L10nEsTicketBaiPaymentScreen = (PaymentScreen) =>
         class extends PaymentScreen {
@@ -74,7 +75,8 @@ odoo.define("l10n_esthis.env._ticketbai_pos.PaymentScreen", function (require) {
                 return res;
             }
 
-            validateOrder(isForceValidate) {
+            async validateOrder(isForceValidate) {
+                framework.blockUI();
                 var self = this;
                 var order = this.env.pos.get_order();
                 if (this.env.pos.company.tbai_enabled && !order.is_to_invoice()) {
@@ -82,7 +84,8 @@ odoo.define("l10n_esthis.env._ticketbai_pos.PaymentScreen", function (require) {
                         super.validateOrder(isForceValidate);
                     } else {
                         order = this.env.pos.get_order();
-                        order.tbai_build_invoice();
+                        await order.set_simple_inv_number();
+                        await order.tbai_build_invoice();
                         order.tbai_current_invoice.then(function (tbai_inv) {
                             order.tbai_simplified_invoice = tbai_inv;
                             self.validateOrder("tbai_inv_up_to_date");
@@ -91,6 +94,7 @@ odoo.define("l10n_esthis.env._ticketbai_pos.PaymentScreen", function (require) {
                 } else {
                     super.validateOrder(isForceValidate);
                 }
+                framework.unblockUI();
             }
         };
     Registries.Component.extend(PaymentScreen, L10nEsTicketBaiPaymentScreen);
