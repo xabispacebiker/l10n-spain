@@ -6,12 +6,12 @@
 odoo.define("l10n_es_ticketbai_pos.widgets", function (require) {
     "use strict";
 
-    var screens = require("point_of_sale.OrderManagementScreen");
-    var tbai_models = require("l10n_es_ticketbai_pos.tbai_models");
+    const screens = require("point_of_sale.OrderManagementScreen");
+    const tbai_models = require("l10n_es_ticketbai_pos.tbai_models");
 
     screens.OrderList.include({
         _prepare_order_from_order_data: function (order_data, action) {
-            var order = this._super(order_data, action);
+            let order = this._super(order_data, action);
             if (this.pos.company.tbai_enabled) {
                 order.tbai_simplified_invoice = new tbai_models.TicketBAISimplifiedInvoice(
                     {},

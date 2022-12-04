@@ -7,19 +7,19 @@
 odoo.define("l10n_esthis.env._ticketbai_pos.PaymentScreen", function (require) {
     "use strict";
 
-    var core = require("web.core");
-    var _t = core._t;
+    const core = require("web.core");
+    const _t = core._t;
     const PaymentScreen = require("point_of_sale.PaymentScreen");
     const Registries = require("point_of_sale.Registries");
-    var framework = require('web.framework');
+    const framework = require('web.framework');
 
     const L10nEsTicketBaiPaymentScreen = (PaymentScreen) =>
         class extends PaymentScreen {
             _isOrderValid(isForceValidate) {
-                var res = super._isOrderValid(isForceValidate);
+                let res = super._isOrderValid(isForceValidate);
                 if (this.env.pos.company.tbai_enabled && res === true) {
-                    var error_msgs = [];
-                    var order = this.env.pos.get_order();
+                    let error_msgs = [];
+                    let order = this.env.pos.get_order();
                     if (this.env.pos.tbai_signer === null) {
                         res = false;
                         error_msgs.push(_t("TicketBAI certificate not loaded!"));
@@ -77,8 +77,8 @@ odoo.define("l10n_esthis.env._ticketbai_pos.PaymentScreen", function (require) {
 
             async validateOrder(isForceValidate) {
                 framework.blockUI();
-                var self = this;
-                var order = this.env.pos.get_order();
+                let self = this;
+                let order = this.env.pos.get_order();
                 if (this.env.pos.company.tbai_enabled && !order.is_to_invoice()) {
                     if (isForceValidate === "tbai_inv_up_to_date") {
                         super.validateOrder(isForceValidate);

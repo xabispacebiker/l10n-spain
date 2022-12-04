@@ -6,7 +6,7 @@
 odoo.define("l10n_es_ticketbai_pos.db", function (require) {
     "use strict";
 
-    var PosDB = require("point_of_sale.DB");
+    const PosDB = require("point_of_sale.DB");
 
     PosDB.include({
         init: function (options) {

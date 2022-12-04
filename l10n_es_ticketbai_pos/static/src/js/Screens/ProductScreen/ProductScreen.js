@@ -14,7 +14,7 @@ odoo.define("l10n_es_ticketbai_pos.ProductScreen", function (require) {
         class extends ProductScreen {
             _clickProduct(event) {
                 const product = event.detail;
-                var res = true;
+                let res = true;
                 if (this.env.pos.company.tbai_enabled) {
                     if (product.taxes_id.length !== 1) {
                         res = false;

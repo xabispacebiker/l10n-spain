@@ -7,21 +7,21 @@
 odoo.define("l10n_es_ticketbai_pos.tbai_models", function (require) {
     "use strict";
 
-    var core = require("web.core");
-    var _t = core._t;
-    var field_utils = require("web.field_utils");
+    const core = require("web.core");
+    const _t = core._t;
+    const field_utils = require("web.field_utils");
 
-    var Backbone = window.Backbone;
-    var tbai = window.tbai;
-    var QRCode = window.QRCode;
+    const Backbone = window.Backbone;
+    const tbai = window.tbai;
+    const QRCode = window.QRCode;
 
     /* A TicketBAI Simplified Invoice represents a customer's order
     to be exported to the Tax Agency.
     */
-    var TicketBAISimplifiedInvoice = Backbone.Model.extend({
+    const TicketBAISimplifiedInvoice = Backbone.Model.extend({
         initialize: function (attributes, options) {
             Backbone.Model.prototype.initialize.apply(this, arguments);
-            var opts = options || {};
+            let opts = options || {};
             this.pos = opts.pos;
             this.previous_tbai_invoice = null;
             this.order = opts.order || null;
@@ -47,13 +47,13 @@ odoo.define("l10n_es_ticketbai_pos.tbai_models", function (require) {
             width: 255,
         },
         build_invoice: function() {
-            var self = this;
-            var built = new $.Deferred();
-            var options = {};
-            var deviceId = this.pos.config.tbai_device_serial_number || null;
+            const self = this;
+            let built = new $.Deferred();
+            let options = {};
+            let deviceId = this.pos.config.tbai_device_serial_number || null;
             // Addon l10n_es_pos -> Order.export_as_JSON()
-            var simplified_invoice = null;
-            var tbai_json = null;
+            let simplified_invoice = null;
+            let tbai_json = null;
 
             this.previous_tbai_invoice = this.pos.get_tbai_last_invoice_data();
             this.expedition_date = new Date();
@@ -61,32 +61,32 @@ odoo.define("l10n_es_ticketbai_pos.tbai_models", function (require) {
             this.number = this.order.l10n_es_unique_id.slice(this.number_prefix.length);
 
             if (this.order.fiscal_position) {
-                var tbai_vat_regime_key = this.order.fiscal_position
+                let tbai_vat_regime_key = this.order.fiscal_position
                     .tbai_vat_regime_key;
                 if (tbai_vat_regime_key) {
-                    var id_vat_regime_key = this.order.fiscal_position
+                    let id_vat_regime_key = this.order.fiscal_position
                         .tbai_vat_regime_key[0];
-                    var object_vat_regime_key = self.pos.tbai_vat_regime_keys.find(
+                    let object_vat_regime_key = self.pos.tbai_vat_regime_keys.find(
                         (x) => x.id === id_vat_regime_key
                     );
                     this.vat_regime_key = object_vat_regime_key.code;
                 }
-                var tbai_vat_regime_key2 = this.order.fiscal_position
+                let tbai_vat_regime_key2 = this.order.fiscal_position
                     .tbai_vat_regime_key2;
                 if (tbai_vat_regime_key2) {
-                    var id_vat_regime_key = this.order.fiscal_position
+                    let id_vat_regime_key = this.order.fiscal_position
                         .tbai_vat_regime_key2[0];
-                    var object_vat_regime_key = self.pos.tbai_vat_regime_keys.find(
+                    let object_vat_regime_key = self.pos.tbai_vat_regime_keys.find(
                         (x) => x.id === id_vat_regime_key
                     );
                     this.vat_regime_key2 = object_vat_regime_key.code;
                 }
-                var tbai_vat_regime_key3 = this.order.fiscal_position
+                let tbai_vat_regime_key3 = this.order.fiscal_position
                     .tbai_vat_regime_key3;
                 if (tbai_vat_regime_key3) {
-                    var id_vat_regime_key = this.order.fiscal_position
+                    let id_vat_regime_key = this.order.fiscal_position
                         .tbai_vat_regime_key3[0];
-                    var object_vat_regime_key = self.pos.tbai_vat_regime_keys.find(
+                    let object_vat_regime_key = self.pos.tbai_vat_regime_keys.find(
                         (x) => x.id === id_vat_regime_key
                     );
                     this.vat_regime_key3 = object_vat_regime_key.code;
@@ -131,9 +131,9 @@ odoo.define("l10n_es_ticketbai_pos.tbai_models", function (require) {
             return built;
         },
         get_vat_without_country_code: function (vat, country_code) {
-            var vat_without_country_code = null;
-            var vat_upper = vat.toUpperCase();
-            var country_code_upper = country_code ? country_code.toUpperCase() : null;
+            let vat_without_country_code = null;
+            let vat_upper = vat.toUpperCase();
+            let country_code_upper = country_code ? country_code.toUpperCase() : null;
             if (country_code_upper && vat_upper.slice(0, country_code_upper.length) === country_code_upper) {
                 vat_without_country_code = vat_upper.slice(country_code_upper.length);
             } else {
@@ -142,12 +142,12 @@ odoo.define("l10n_es_ticketbai_pos.tbai_models", function (require) {
             return vat_without_country_code;
         },
         get_tbai_company_vat: function () {
-            var company = this.pos.company;
+            let company = this.pos.company;
             return this.get_vat_without_country_code(company.vat, company.country.code);
         },
         get_tbai_partner_vat: function (partner_id) {
-            var partner = this.pos.db.get_partner_by_id(partner_id);
-            var country_code = this.pos.get_country_code_by_id(partner.country_id[0]);
+            let partner = this.pos.db.get_partner_by_id(partner_id);
+            let country_code = this.pos.get_country_code_by_id(partner.country_id[0]);
             if (country_code === "ES" || partner.tbai_partner_idtype === "02") {
                 return this.get_vat_without_country_code(partner.vat, country_code);
             } else {
@@ -155,7 +155,7 @@ odoo.define("l10n_es_ticketbai_pos.tbai_models", function (require) {
             }
         },
         get_vat_keys: function(order_json) {
-            var vat_keys = [this.pos.get_tbai_vat_regime_key_code_by_id(this.vat_regime_key)];
+            let vat_keys = [this.pos.get_tbai_vat_regime_key_code_by_id(this.vat_regime_key)];
             if (this.vat_regime_key2 !== null) {
                 vat_keys.push(
                     this.pos.get_tbai_vat_regime_key_code_by_id(this.vat_regime_key2)
@@ -169,11 +169,11 @@ odoo.define("l10n_es_ticketbai_pos.tbai_models", function (require) {
             return vat_keys;
         },
         export_as_JSON: function () {
-            var order_json = (this.order !== null && this.order.export_as_JSON()) || null;
-            var tbai_json = {};
-            var company = this.pos.company;
-            var vat_keys = [this.vat_regime_key];
-            var self = this;
+            let order_json = (this.order !== null && this.order.export_as_JSON()) || null;
+            let tbai_json = {};
+            let company = this.pos.company;
+            let vat_keys = [this.vat_regime_key];
+            let self = this;
             if (order_json !== null
                 && this.number !== null
                 && this.expedition_date !== null) {
@@ -204,9 +204,9 @@ odoo.define("l10n_es_ticketbai_pos.tbai_models", function (require) {
                 };
                 tbai_json.Invoice.vatLines = this.get_tbai_vat_lines_from_json(order_json);
                 if (order_json.partner_id) {
-                    var partner = this.pos.db.get_partner_by_id(order_json.partner_id);
-                    var zip = partner.zip;
-                    var address =
+                    let partner = this.pos.db.get_partner_by_id(order_json.partner_id);
+                    let zip = partner.zip;
+                    let address =
                         (partner.street || "") +
                         ", " +
                         (partner.zip || "") +
@@ -239,11 +239,11 @@ odoo.define("l10n_es_ticketbai_pos.tbai_models", function (require) {
             return tbai_json;
         },
         get_tbai_lines_from_json: function (lines_json) {
-            var lines = [];
-            var line = null;
-            var company = this.pos.company;
-            var description_line = null;
-            var self = this;
+            let lines = [];
+            let line = null;
+            let company = this.pos.company;
+            let description_line = null;
+            let self = this;
             lines_json.forEach(function (item) {
                 line = item[2];
                 description_line = line.tbai_description.substring(0, 250);
@@ -272,12 +272,12 @@ odoo.define("l10n_es_ticketbai_pos.tbai_models", function (require) {
             return lines;
         },
         get_tbai_vat_lines_from_json: function (order_json) {
-            var vatLines = [];
-            var vatLinesJson = order_json.taxLines;
-            var self = this;
+            let vatLines = [];
+            let vatLinesJson = order_json.taxLines;
+            let self = this;
             if (vatLinesJson && vatLinesJson.length > 0) {
                 vatLinesJson.forEach(function (vatLineJson) {
-                    var vatLine = vatLineJson[2];
+                    let vatLine = vatLineJson[2];
                     vatLines.push({
                         base: field_utils.parse.float(
                             self.pos.format_currency_no_symbol(vatLine.baseAmount)
@@ -289,7 +289,7 @@ odoo.define("l10n_es_ticketbai_pos.tbai_models", function (require) {
                     });
                 });
             } else {
-                var fline = order_json.lines[0][2];
+                let fline = order_json.lines[0][2];
                 vatLines.push({
                     base: field_utils.parse.float(
                         self.pos.format_currency_no_symbol(order_json.amount_total)

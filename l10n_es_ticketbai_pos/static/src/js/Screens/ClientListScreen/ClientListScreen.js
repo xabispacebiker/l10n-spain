@@ -14,11 +14,11 @@ odoo.define("l10n_es_ticketbai_pos.ClientListScreen", function (require) {
         class extends ClientListScreen {
             clickClient(event) {
                 if (this.env.pos.company.tbai_enabled) {
-                    var customer = this.env.pos.db.get_partner_by_id(
+                    let customer = this.env.pos.db.get_partner_by_id(
                         event.detail.client.id
                     );
-                    var order = this.env.pos.get_order();
-                    var res = true;
+                    let order = this.env.pos.get_order();
+                    let res = true;
 
                     if (!order.check_customer_country_code(customer)) {
                         res = false;
