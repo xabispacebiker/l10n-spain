@@ -52,7 +52,7 @@ odoo.define("l10n_es_ticketbai_pos.tbai_models", function (require) {
             let options = {};
             let deviceId = this.pos.config.tbai_device_serial_number || null;
             // Addon l10n_es_pos -> Order.export_as_JSON()
-            let simplified_invoice = null;
+            // let simplified_invoice = null;
             let tbai_json = null;
 
             this.previous_tbai_invoice = this.pos.get_tbai_last_invoice_data();

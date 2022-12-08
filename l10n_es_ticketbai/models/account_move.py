@@ -73,7 +73,7 @@ class AccountMove(models.Model):
             (RefundCode.R4.value, "Art. 80 - other"),
         ],
         help="BOE-A-1992-28740. Ley 37/1992, de 28 de diciembre, del Impuesto sobre el "
-        "Valor Añadido. Artículo 80. Modificación de la base imponible.",
+             "Valor Añadido. Artículo 80. Modificación de la base imponible.",
         copy=False,
     )
     tbai_refund_type = fields.Selection(
@@ -105,10 +105,10 @@ class AccountMove(models.Model):
     def _check_cancel_number_invoice(self):
         for record in self:
             if (
-                record.move_type in ("out_invoice", "out_refund")
-                and record.tbai_enabled
-                and "draft" == record.state
-                and record.tbai_invoice_id
+                    record.move_type in ("out_invoice", "out_refund")
+                    and record.tbai_enabled
+                    and "draft" == record.state
+                    and record.tbai_invoice_id
             ):
                 raise exceptions.ValidationError(
                     _("You cannot change to draft a TicketBAI invoice!")
@@ -125,8 +125,8 @@ class AccountMove(models.Model):
                 "default_move_type", False
             )
             refund_method = (
-                self._context.get("refund_method", False)
-                or invoice_type == "out_refund"
+                    self._context.get("refund_method", False)
+                    or invoice_type == "out_refund"
             )
             if refund_method and invoice_type:
                 if "out_refund" == invoice_type:
@@ -257,10 +257,10 @@ class AccountMove(models.Model):
                     0,
                     {
                         "name": partner.tbai_get_value_apellidos_nombre_razon_social(),
-                        "country_code": partner.tbai_get_partner_country_code(),
+                        "country_code": partner._parse_aeat_vat_info()[0],
                         "nif": partner.tbai_get_value_nif(),
                         "identification_number": (
-                            partner.tbai_partner_identification_number or partner.vat
+                                partner.tbai_partner_identification_number or partner.vat
                         ),
                         "idtype": partner.tbai_partner_idtype,
                         "address": partner.tbai_get_value_direccion(),
@@ -272,8 +272,8 @@ class AccountMove(models.Model):
         if retencion_soportada:
             vals["tax_retention_amount_total"] = retencion_soportada
         if (
-            self.tbai_is_invoice_refund()
-            and RefundType.differences.value == self.tbai_refund_type
+                self.tbai_is_invoice_refund()
+                and RefundType.differences.value == self.tbai_refund_type
         ):
             tbai_prepare_refund_values()
         operation_date = self.tbai_get_value_fecha_operacion()
@@ -289,10 +289,11 @@ class AccountMove(models.Model):
             for line in self.invoice_line_ids:
                 description_line = line.name[:250]
                 if (
-                    self.company_id.tbai_protected_data
-                    and self.company_id.tbai_protected_data_txt
+                        self.company_id.tbai_protected_data
+                        and self.company_id.tbai_protected_data_txt
                 ):
                     description_line = self.company_id.tbai_protected_data_txt[:250]
+                price_unit = line.tbai_get_price_unit()
                 lines.append(
                     (
                         0,
@@ -300,8 +301,10 @@ class AccountMove(models.Model):
                         {
                             "description": description_line,
                             "quantity": line.tbai_get_value_cantidad(),
-                            "price_unit": "%.8f" % line.price_unit,
-                            "discount_amount": line.tbai_get_value_descuento(),
+                            "price_unit": "%.8f" % price_unit,
+                            "discount_amount": line.tbai_get_value_descuento(
+                                price_unit
+                            ),
                             "amount_total": line.tbai_get_value_importe_total(),
                         },
                     )
@@ -314,20 +317,20 @@ class AccountMove(models.Model):
             tbai_maps.mapped("tax_template_ids")
         )
         for tax in (
-            self.invoice_line_ids.filtered(lambda x: x.tax_ids)
-            .mapped("tax_ids")
-            .filtered(lambda t: t not in exclude_taxes)
+                self.invoice_line_ids.filtered(lambda x: x.tax_ids)
+                        .mapped("tax_ids")
+                        .filtered(lambda t: t not in exclude_taxes)
         ):
             tax_subject_to = tax.tbai_is_subject_to_tax()
             not_subject_to_cause = (
-                not tax_subject_to and tax.tbai_get_value_causa(self) or ""
+                    not tax_subject_to and tax.tbai_get_value_causa(self) or ""
             )
             is_exempted = tax_subject_to and tax.tbai_is_tax_exempted() or False
             not_exempted_type = (
-                tax_subject_to
-                and not is_exempted
-                and tax.tbai_get_value_tipo_no_exenta()
-                or ""
+                    tax_subject_to
+                    and not is_exempted
+                    and tax.tbai_get_value_tipo_no_exenta()
+                    or ""
             )
             exemption = ""
             if tax.tbai_is_tax_exempted():
@@ -357,7 +360,7 @@ class AccountMove(models.Model):
                         "amount_total": tax.tbai_get_value_cuota_impuesto(self),
                         "re_amount": tax.tbai_get_value_tipo_recargo_equiv(self) or "",
                         "re_amount_total": (
-                            tax.tbai_get_value_cuota_recargo_equiv(self) or ""
+                                tax.tbai_get_value_cuota_recargo_equiv(self) or ""
                         ),
                         "surcharge_or_simplified_regime": (
                             tax.tbai_get_value_op_recargo_equiv_o_reg_simpl(self)
@@ -451,17 +454,17 @@ class AccountMove(models.Model):
         tbai_invoices = self.sudo().env["account.move"]
         tbai_invoices |= self.sudo().filtered(
             lambda x: x.tbai_enabled
-            and "out_invoice" == x.move_type
-            and x.tbai_send_invoice
+                      and "out_invoice" == x.move_type
+                      and x.tbai_send_invoice
         )
         refund_invoices = self.sudo().filtered(
             lambda x: x.tbai_enabled
-            and "out_refund" == x.move_type
-            and (
-                not x.tbai_refund_type
-                or x.tbai_refund_type == RefundType.differences.value
-            )
-            and x.tbai_send_invoice
+                      and "out_refund" == x.move_type
+                      and (
+                              not x.tbai_refund_type
+                              or x.tbai_refund_type == RefundType.differences.value
+                      )
+                      and x.tbai_send_invoice
         )
 
         validate_refund_invoices()
@@ -477,8 +480,8 @@ class AccountMove(models.Model):
 
     def tbai_is_invoice_refund(self):
         if "out_refund" == self.move_type or (
-            "out_invoice" == self.move_type
-            and RefundType.substitution.value == self.tbai_refund_type
+                "out_invoice" == self.move_type
+                and RefundType.substitution.value == self.tbai_refund_type
         ):
             res = True
         else:
@@ -615,15 +618,13 @@ class AccountMoveLine(models.Model):
             sign = 1
         return "%.2f" % (sign * self.quantity)
 
-    def tbai_get_value_descuento(self):
+    def tbai_get_value_descuento(self, price_unit):
         if self.discount:
             if RefundType.differences.value == self.move_id.tbai_refund_type:
                 sign = -1
             else:
                 sign = 1
-            res = "%.2f" % (
-                sign * self.quantity * self.price_unit * self.discount / 100.0
-            )
+            res = "%.2f" % (sign * self.quantity * price_unit * self.discount / 100.0)
         else:
             res = "0.00"
         return res
@@ -648,6 +649,14 @@ class AccountMoveLine(models.Model):
         else:
             sign = 1
         return "%.2f" % (sign * price_total)
+
+    def tbai_get_price_unit(self):
+        price_unit = self.price_unit
+        for tax in self.tax_ids.filtered(lambda t: t.price_include):
+            price_unit = price_unit - (
+                    self.price_unit * tax.amount / (100 + tax.amount)
+            )
+        return price_unit
 
 
 class AccountMoveReversal(models.TransientModel):
