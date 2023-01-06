@@ -48,7 +48,8 @@ class PosOrder(models.Model):
     def _order_fields(self, ui_order):
         res = super()._order_fields(ui_order)
         session = self.env["pos.session"].browse(ui_order["pos_session_id"])
-        if session.config_id.tbai_enabled and not ui_order.get("to_invoice", False):
+        # if session.config_id.tbai_enabled and not ui_order.get("to_invoice", False):
+        if session.config_id.tbai_enabled and not ui_order.get("to_invoice", False) and ui_order.get('tbai_vat_regime_key', False):
             res["tbai_vat_regime_key"] = ui_order["tbai_vat_regime_key"]
         return res
 
@@ -104,15 +105,16 @@ class PosOrder(models.Model):
                 vals[
                     "previous_tbai_invoice_id"
                 ] = tbai_previous_order.tbai_invoice_id.id
-            datas = base64.b64encode(pos_order["data"]["tbai_datas"].encode("utf-8"))
-            vals.update(
-                {
-                    "datas": datas,
-                    "datas_fname": "%s.xsig" % self.l10n_es_unique_id.replace("/", "-"),
-                    "file_size": len(datas),
-                    "signature_value": pos_order["data"]["tbai_signature_value"],
-                }
-            )
+            if order_data.get('tbai_datas'):
+                datas = base64.b64encode(order_data.get("tbai_datas").encode("utf-8"))
+                vals.update(
+                    {
+                        "datas": datas,
+                        "datas_fname": "%s.xsig" % self.l10n_es_unique_id.replace("/", "-"),
+                        "file_size": len(datas),
+                        "signature_value": pos_order["data"]["tbai_signature_value"],
+                    }
+                )
         gipuzkoa_tax_agency = self.env.ref(
             "l10n_es_ticketbai_api.tbai_tax_agency_gipuzkoa"
         )
@@ -183,7 +185,7 @@ class PosOrder(models.Model):
     @api.model
     def _process_order(self, pos_order, draft, existing_order):
         if pos_order["data"].get("tbai_vat_regime_key", False) and isinstance(
-            pos_order["data"]["tbai_vat_regime_key"], str
+                pos_order["data"]["tbai_vat_regime_key"], str
         ):
             regime_key = pos_order["data"]["tbai_vat_regime_key"]
             pos_order["data"]["tbai_vat_regime_key"] = (
@@ -193,7 +195,7 @@ class PosOrder(models.Model):
             )
         order_id = super()._process_order(pos_order, draft, existing_order)
         order = self.env["pos.order"].browse(order_id)
-        if order.config_id.tbai_enabled and not pos_order.get("to_invoice", False):
+        if not draft and order.config_id.tbai_enabled and not pos_order.get("to_invoice", False):
             vals = order.tbai_prepare_invoice_values(pos_order)
             order.tbai_invoice_id = self.env["tbai.invoice"].sudo().create(vals)
             order.config_id.tbai_last_invoice_id = order.tbai_invoice_id
@@ -247,15 +249,17 @@ class PosOrder(models.Model):
         return prefix
 
     def tbai_get_value_num_factura(self):
+        if not self.l10n_es_unique_id:
+            return False
         invoice_number_prefix = self.tbai_get_value_serie_factura()
         if invoice_number_prefix and not self.l10n_es_unique_id.startswith(
-            invoice_number_prefix
+                invoice_number_prefix
         ):
             raise exceptions.ValidationError(
                 _("Simplified Invoice Number Prefix %s is not part of Number %s!")
                 % (invoice_number_prefix, self.l10n_es_unique_id)
             )
-        return self.l10n_es_unique_id[len(invoice_number_prefix) :]
+        return self.l10n_es_unique_id[len(invoice_number_prefix):]
 
     def tbai_get_value_fecha_expedicion_factura(self):
         date = fields.Datetime.context_timestamp(

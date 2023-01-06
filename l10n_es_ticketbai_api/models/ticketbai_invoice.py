@@ -244,7 +244,7 @@ class TicketBAIInvoice(models.Model):
                         _(
                             "TicketBAI Invoice %s:\n"
                             "Already exists a TicketBAI Invoice with the  "
-                            "same link to itsprevious TicketBAI Invoice."
+                            "same link to its previous TicketBAI Invoice."
                         )
                         % r.name
                     )
